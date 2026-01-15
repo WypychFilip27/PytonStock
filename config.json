@@ -5,7 +5,14 @@
         "USDPLN=X",
         "BTC-USD",
         "PKO.WA",
-        "VOT.WA"
+        "VOT.WA",
+        "SLV.WA",
+        "MBR.WA",
+        "11B.WA",
+        "LBW.WA",
+        "TXT.WA",
+        "WPL.WA",
+        "CPS.WA"
     ],
     "okres": "1d"
 }
