@@ -4,6 +4,7 @@ import pandas as pd  # Biblioteka do łatwego zapisu CSV
 import os            # Do otwierania pliku w systemie
 import platform      # Do sprawdzenia systemu operacyjnego
 import numpy as np
+from strategies import pobierz_sygnal_donchian
 # 1. Wczytujemy konfigurację
 try:
     with open('config.json', 'r') as plik:
@@ -21,10 +22,11 @@ if symbole:
     print(f"--- POBIERANIE DANYCH ({okres}) ---")
     print(f"{'SYMBOL':<{10}} | "
           f"{'CENA':>{12}} | "
-          f"{'ROR(30)':>{12}} | "
+          f"{'ROR(30)':>{8}} | "
           f"{'RSI':>{7}} |"
-          f"{'Trend Pullback (RSI + Trend)':>{7}} |"
-          f"{'Złoty Krzyż (SMA)':>{7}}")
+          f"{'T.Pullback (RSI + Trend)':>{7}} |"
+          f"{'Złoty Krzyż (SMA)':>{7}} |"
+          f"{'Donchian':>{7}}")
     for symbol in symbole:
         try:
             ticker = yf.Ticker(symbol)
@@ -56,10 +58,10 @@ if symbole:
                     backtest1 = "SPRZEDAJ"
 
                 elif rate_of_return < 0:
-                    backtest1 = "ZAMKNIJ POZYCJĘ"
+                    backtest1 = "ZAMKNIJ"
 
                 else:
-                    backtest1 = "CZEKAJ (Brak sygnału)"
+                    backtest1 = "CZEKAJ"
 
                 # 1. Oblicz średnie (jeśli jeszcze ich nie masz)
                 dane['SMA50'] = dane['Close'].rolling(window=50).mean()
@@ -70,7 +72,7 @@ if symbole:
 
                 # 3. Wykryj MOMENT zmiany (1 = przecięcie w górę, -1 = przecięcie w dół)
                 dane['Zmiana'] = dane['Trend_Wzrostowy'].diff()
-
+                donchianSignal = pobierz_sygnal_donchian(symbol)
                 # 4. Logika tekstowa (Kolejność warunków jest ważna!)
                 warunki = [
                     (dane['Zmiana'] == 1),              # Sytuacja A: Właśnie przecięło w górę -> KUPUJ
@@ -79,7 +81,7 @@ if symbole:
                 ]
 
                 # Co wpisać dla poszczególnych sytuacji
-                wyniki = ['KUPUJ (Sygnał)', 'SPRZEDAJ (Sygnał)', 'TRZYMAJ']
+                wyniki = ['KUPUJ', 'SPRZEDAJ', 'TRZYMAJ']
 
                 # Domyślnie (jeśli żaden warunek nie pasuje) wpisz "POZA RYNKIEM" (trend spadkowy, brak akcji)
                 dane['Strategia'] = np.select(warunki, wyniki, default='POZA RYNKIEM')
@@ -93,10 +95,11 @@ if symbole:
                 print(
                     f"{symbol:<10} | "
                     f"{cena:>8.2f} {waluta:<3} | "
-                    f"{rate_of_return*100:>15.2f}% | "
-                    f"{current_rsi:>6.2f} | "
+                    f"{rate_of_return*100:>7.2f}% | "
+                    f"{current_rsi:>7.2f} | "
                     f"{backtest1} | "
-                    f"{dane['Strategia'].iloc[-1]}"
+                    f"{dane['Strategia'].iloc[-1]} |"
+                    f"{donchianSignal}"
                 )
             else:
                 print(f"{symbol:<10} | Brak danych")
