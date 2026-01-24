@@ -4,7 +4,10 @@ import pandas as pd  # Biblioteka do łatwego zapisu CSV
 import os            # Do otwierania pliku w systemie
 import platform      # Do sprawdzenia systemu operacyjnego
 import numpy as np
-from strategies import pobierz_sygnal_donchian
+from strategies.strategies import pobierz_sygnal_donchian
+from strategies.pullBackStrategy import pobierz_sygnal_pullBack
+from strategies.goldCross import pobierz_sygnal_goldCross
+from strategies.bollingerBands import pobierz_sygnal_bollingerBandsSquezze
 # 1. Wczytujemy konfigurację
 try:
     with open('config.json', 'r') as plik:
@@ -24,7 +27,7 @@ if symbole:
           f"{'CENA':>{12}} | "
           f"{'ROR(30)':>{8}} | "
           f"{'RSI':>{7}} |"
-          f"{'T.Pullback (RSI + Trend)':>{7}} |"
+          f"{'(RSI + Trend)':>{7}} |"
           f"{'Złoty Krzyż (SMA)':>{7}} |"
           f"{'Donchian':>{7}}")
     for symbol in symbole:
@@ -51,40 +54,11 @@ if symbole:
                 rsi = 100 - (100 /(1 +rs))
                 current_rsi = rsi.iloc[-1]
 
-                if rate_of_return > 0 and current_rsi < 30:
-                    backtest1 = "KUPUJ"
-
-                elif current_rsi > 70:
-                    backtest1 = "SPRZEDAJ"
-
-                elif rate_of_return < 0:
-                    backtest1 = "ZAMKNIJ"
-
-                else:
-                    backtest1 = "CZEKAJ"
-
-                # 1. Oblicz średnie (jeśli jeszcze ich nie masz)
-                dane['SMA50'] = dane['Close'].rolling(window=50).mean()
-                dane['SMA200'] = dane['Close'].rolling(window=200).mean()
-
-                # 2. Określ czy jesteśmy w trendzie wzrostowym (1) czy spadkowym (0)
-                dane['Trend_Wzrostowy'] = np.where(dane['SMA50'] > dane['SMA200'], 1, 0)
-
-                # 3. Wykryj MOMENT zmiany (1 = przecięcie w górę, -1 = przecięcie w dół)
-                dane['Zmiana'] = dane['Trend_Wzrostowy'].diff()
+                pullBackSignal = pobierz_sygnal_pullBack(rate_of_return, current_rsi)
                 donchianSignal = pobierz_sygnal_donchian(symbol)
-                # 4. Logika tekstowa (Kolejność warunków jest ważna!)
-                warunki = [
-                    (dane['Zmiana'] == 1),              # Sytuacja A: Właśnie przecięło w górę -> KUPUJ
-                    (dane['Zmiana'] == -1),             # Sytuacja B: Właśnie przecięło w dół -> SPRZEDAJ
-                    (dane['Trend_Wzrostowy'] == 1)      # Sytuacja C: Brak zmiany, ale trend jest wzrostowy -> TRZYMAJ
-                ]
+                goldCrossSignal = pobierz_sygnal_goldCross(dane,np)
+                bollingerSignal = pobierz_sygnal_bollingerBandsSquezze(dane,np)
 
-                # Co wpisać dla poszczególnych sytuacji
-                wyniki = ['KUPUJ', 'SPRZEDAJ', 'TRZYMAJ']
-
-                # Domyślnie (jeśli żaden warunek nie pasuje) wpisz "POZA RYNKIEM" (trend spadkowy, brak akcji)
-                dane['Strategia'] = np.select(warunki, wyniki, default='POZA RYNKIEM')
                 wyniki.append({
                     "Symbol": symbol,
                     "Cena": round(cena, 2),
@@ -97,9 +71,10 @@ if symbole:
                     f"{cena:>8.2f} {waluta:<3} | "
                     f"{rate_of_return*100:>7.2f}% | "
                     f"{current_rsi:>7.2f} | "
-                    f"{backtest1} | "
-                    f"{dane['Strategia'].iloc[-1]} |"
-                    f"{donchianSignal}"
+                    f"{pullBackSignal} | "
+                    f"{goldCrossSignal} |"
+                    f"{donchianSignal} |"
+                    f"{bollingerSignal}"
                 )
             else:
                 print(f"{symbol:<10} | Brak danych")
