@@ -1,12 +1,9 @@
 {
-    "symbole": [
-        "AAPL",
-        "CDR.WA",
+    "symbole": [ 
         "APR.WA",
         "ATT.WA",
         "WTN.WA",
-        "XTP.WA",
-        "PKO.WA",
+        "XTP.WA", 
         "VOT.WA",
         "SLV.WA",
         "MBR.WA",
@@ -14,7 +11,12 @@
         "LBW.WA",
         "TXT.WA",
         "WPL.WA",
-        "CPS.WA"
+        "CPS.WA",
+        "MGT.WA",
+        "ALE.WA",
+        "DNP.WA",
+        "MDV.WA",
+        "APT.WA"
     ],
     "okres": "1d"
 }
