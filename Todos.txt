@@ -1,0 +1,6 @@
+1. Wolumen dodać
+2. Schortcut - run visual code, run py command
+3. wypisz sobie wszystkie akcje 
+ALE.WA, MGT.WA ,CPS.WA , WPL.WA, SLV.WA , XTP.WA, APR.WA, TXT.WA
+
+ALE.WA, MGT.WA ,LBW.WA, WPL.WA, SLV.WA , XTP.WA, APR.WA, TXT.WA, DNP.WA

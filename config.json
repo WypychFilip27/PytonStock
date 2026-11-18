@@ -13,10 +13,16 @@
         "WPL.WA",
         "CPS.WA",
         "MGT.WA",
-        "ALE.WA",
         "DNP.WA",
         "MDV.WA",
-        "APT.WA"
+        "APT.WA",
+        "WLT.WA",
+        "RBW.WA",
+        "DIA.WA",
+        "AMB.WA",
+        "CIG.WA",
+        "BCX.WA",
+        "ACG.WA"
     ],
     "okres": "1d"
 }
